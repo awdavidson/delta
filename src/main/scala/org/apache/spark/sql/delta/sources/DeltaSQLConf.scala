@@ -294,6 +294,13 @@ trait DeltaSQLConfBase {
       .longConf
       .createWithDefault(10000L)
 
+  val MERGE_MAX_PARTITION_PARTS =
+    buildConf("merge.maxPartitionParts")
+    .internal()
+    .doc("Max number of part files per output partition when MERGE.")
+    .intConf
+    .createWithDefault(1)
+
   val MERGE_INSERT_ONLY_ENABLED =
     buildConf("merge.optimizeInsertOnlyMerge.enabled")
       .internal()

@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-
 import org.apache.spark.sql.delta._
 import org.apache.spark.sql.delta.actions.{AddFile, FileAction}
 import org.apache.spark.sql.delta.files._
@@ -28,7 +27,6 @@ import org.apache.spark.sql.delta.schema.ImplicitMetadataOperation
 import org.apache.spark.sql.delta.sources.DeltaSQLConf
 import org.apache.spark.sql.delta.util.{AnalysisHelper, SetAccumulator}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
@@ -43,7 +41,7 @@ import org.apache.spark.sql.execution.command.RunnableCommand
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.metric.{SQLMetric, SQLMetrics}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 
 case class MergeDataSizes(
   @JsonDeserialize(contentAs = classOf[java.lang.Long])
@@ -637,7 +635,14 @@ case class MergeIntoCommand(
       df: DataFrame,
       partitionColumns: Seq[String]): DataFrame = {
     if (partitionColumns.nonEmpty && spark.conf.get(DeltaSQLConf.MERGE_REPARTITION_BEFORE_WRITE)) {
-      df.repartition(partitionColumns.map(col): _*)
+      // MERGE_MAX_PARTITION_PARTS default = 1 meaning no change to original functionality
+      // When MERGE_MAX_PARTITION_PARTS > 1 syntheticCol will help split partition into smaller
+      // chunks. This helps mitigate skewed partitions.
+      // NB: minus 1 from MERGE_MAX_PARTITION_PARTS to ensure default value does not
+      // augment original functionality
+      val maxParts = spark.conf.get(DeltaSQLConf.MERGE_MAX_PARTITION_PARTS) - 1
+      val syntheticCol = (rand() * maxParts).cast(IntegerType)
+      df.repartition(syntheticCol +: partitionColumns.map(col): _*)
     } else {
       df
     }
