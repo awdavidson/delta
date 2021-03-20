@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+
 import org.apache.spark.sql.delta._
 import org.apache.spark.sql.delta.actions.{AddFile, FileAction}
 import org.apache.spark.sql.delta.files._
@@ -27,6 +28,7 @@ import org.apache.spark.sql.delta.schema.ImplicitMetadataOperation
 import org.apache.spark.sql.delta.sources.DeltaSQLConf
 import org.apache.spark.sql.delta.util.{AnalysisHelper, SetAccumulator}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.catalyst.InternalRow
