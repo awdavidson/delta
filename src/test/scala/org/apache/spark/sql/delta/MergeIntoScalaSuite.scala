@@ -268,8 +268,8 @@ class MergeIntoScalaSuite extends MergeIntoSuiteBase  with DeltaSQLCommandTest {
     }
   }
 
-  test("merge without table alias and set MERGE_MAX_PARTITION_PARTS") {
-    withSQLConf((DeltaSQLConf.MERGE_MAX_PARTITION_PARTS.key, "2")) {
+  test("merge without table alias and set MERGE_MAX_PARTITION_FILES") {
+    withSQLConf((DeltaSQLConf.MERGE_MAX_PARTITION_FILES.key, "2")) {
       withTempDir { dir =>
         val location = dir.getAbsolutePath
         Seq((1, 1, 1), (2, 2, 2)).toDF("part", "id", "n").write

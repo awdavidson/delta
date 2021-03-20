@@ -637,13 +637,11 @@ case class MergeIntoCommand(
       df: DataFrame,
       partitionColumns: Seq[String]): DataFrame = {
     if (partitionColumns.nonEmpty && spark.conf.get(DeltaSQLConf.MERGE_REPARTITION_BEFORE_WRITE)) {
-      // MERGE_MAX_PARTITION_PARTS default = 1 meaning no change to original functionality
-      // When MERGE_MAX_PARTITION_PARTS > 1 syntheticCol will help split partition into smaller
+      // MERGE_MAX_PARTITION_FILES default = 1 meaning no change to original functionality
+      // When MERGE_MAX_PARTITION_FILES > 1 syntheticCol will help split partition into smaller
       // chunks. This helps mitigate skewed partitions.
-      // NB: minus 1 from MERGE_MAX_PARTITION_PARTS to ensure default value does not
-      // augment original functionality
-      val maxParts = spark.conf.get(DeltaSQLConf.MERGE_MAX_PARTITION_PARTS) - 1
-      val syntheticCol = (rand() * maxParts).cast(IntegerType)
+      val maxFiles = spark.conf.get(DeltaSQLConf.MERGE_MAX_PARTITION_FILES)
+      val syntheticCol = (rand() * maxFiles).cast(IntegerType)
       df.repartition(syntheticCol +: partitionColumns.map(col): _*)
     } else {
       df
